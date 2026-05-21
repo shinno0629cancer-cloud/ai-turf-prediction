@@ -120,67 +120,76 @@ def calculate_horse_score(horse_name):
 @app.on_event("startup")
 async def startup_event():
     global scraped_races_cache
-    races_data = scrape_today_races()
-    
-    # もしレースが見つからなかった場合のフォールバック（開催日でない場合など）
-    if not races_data:
-        print("本日のレース情報が見つからなかったため、ダミーデータを使用します。")
-        races_data = [
-            {
-                "race_name": "第91回 日本ダービー(G1)",
-                "location": "東京",
-                "horses": [{"name": "ジャスティンミラノ"}, {"name": "シンエンペラー"}, {"name": "アーバンシック"}]
-            },
-            {
-                "race_name": "第65回 宝塚記念(G1)",
-                "location": "京都",
-                "horses": [{"name": "ドウデュース"}, {"name": "ジャスティンパレス"}, {"name": "ブローザホーン"}]
-            }
-        ]
+    try:
+        races_data = scrape_today_races()
         
-    # 各馬のスコアと印、コメントを事前計算
-    for race in races_data:
-        horses = race["horses"]
-        for horse in horses:
-            score, has_top_3, jockey_win, cond, metrics = calculate_horse_score(horse["name"])
-            horse["score"] = score
-            horse["metrics"] = metrics
+        # もしレースが見つからなかった場合のフォールバック（開催日でない場合など）
+        if not races_data:
+            print("本日のレース情報が見つからなかったため、ダミーデータを使用します。")
+            races_data = [
+                {
+                    "race_name": "第91回 日本ダービー(G1)",
+                    "location": "東京",
+                    "horses": [{"name": "ジャスティンミラノ"}, {"name": "シンエンペラー"}, {"name": "アーバンシック"}]
+                },
+                {
+                    "race_name": "第65回 宝塚記念(G1)",
+                    "location": "京都",
+                    "horses": [{"name": "ドウデュース"}, {"name": "ジャスティンパレス"}, {"name": "ブローザホーン"}]
+                }
+            ]
             
-            comment_parts = []
-            if has_top_3:
-                comment_parts.append("過去実績は十分。")
-            else:
-                comment_parts.append("近走は振るわないが展開待ち。")
+        # 各馬のスコアと印、コメントを事前計算
+        for race in races_data:
+            horses = race["horses"]
+            for horse in horses:
+                score, has_top_3, jockey_win, cond, metrics = calculate_horse_score(horse["name"])
+                horse["score"] = score
+                horse["metrics"] = metrics
                 
-            if jockey_win >= 0.10:
-                comment_parts.append("鞍上の勝率も高く好材料。")
+                comment_parts = []
+                if has_top_3:
+                    comment_parts.append("過去実績は十分。")
+                else:
+                    comment_parts.append("近走は振るわないが展開待ち。")
+                    
+                if jockey_win >= 0.10:
+                    comment_parts.append("鞍上の勝率も高く好材料。")
+                    
+                if cond > 10:
+                    comment_parts.append("調教の動きも絶好調で期待できる。")
+                elif cond < 0:
+                    comment_parts.append("状態面で少し不安が残るか。")
+                else:
+                    comment_parts.append("順調に仕上がっている。")
+                    
+                horse["comment"] = "".join(comment_parts) + f"（AIスコア: {score}点）"
                 
-            if cond > 10:
-                comment_parts.append("調教の動きも絶好調で期待できる。")
-            elif cond < 0:
-                comment_parts.append("状態面で少し不安が残るか。")
-            else:
-                comment_parts.append("順調に仕上がっている。")
-                
-            horse["comment"] = "".join(comment_parts) + f"（AIスコア: {score}点）"
+            # スコア順にソート (降順)
+            horses.sort(key=lambda x: x["score"], reverse=True)
             
-        # スコア順にソート (降順)
-        horses.sort(key=lambda x: x["score"], reverse=True)
-        
-        # 上位から印を割り当てる
-        marks = ["◎", "〇", "▲", "△", "☆"]
-        for i, horse in enumerate(horses):
-            if i < len(marks):
-                horse["mark"] = marks[i]
-            else:
-                horse["mark"] = "・"
-                
-    scraped_races_cache = races_data
-    print(f"{len(scraped_races_cache)}件のレース情報を読み込みました。")
+            # 上位から印を割り当てる
+            marks = ["◎", "〇", "▲", "△", "☆"]
+            for i, horse in enumerate(horses):
+                if i < len(marks):
+                    horse["mark"] = marks[i]
+                else:
+                    horse["mark"] = "・"
+                    
+        scraped_races_cache = races_data
+        print(f"{len(scraped_races_cache)}件のレース情報を読み込みました。")
+    except Exception as e:
+        print(f"Startup Error: {e}")
+        scraped_races_cache = [{"error": str(e)}]
 
 @app.get("/")
 async def read_root(request: Request):
-    return templates.TemplateResponse(
-        "index.html", 
-        {"request": request, "races": scraped_races_cache}
-    )
+    try:
+        return templates.TemplateResponse(
+            "index.html", 
+            {"request": request, "races": scraped_races_cache}
+        )
+    except Exception as e:
+        import traceback
+        error_msg = traceback.format_exc()
+        return {"error": str(e), "traceback": error_msg}
