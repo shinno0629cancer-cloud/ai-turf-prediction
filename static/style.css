@@ -1,0 +1,455 @@
+:root {
+    --bg-dark-green: #0a2918; /* Racing Green */
+    --card-bg: #143d25;
+    --gold: #d4af37;
+    --gold-light: #f3d56a;
+    --text-white: #f5f5f5;
+    --text-gray: #b0c4b1;
+    --border-color: rgba(212, 175, 55, 0.3);
+}
+
+body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background-color: var(--bg-dark-green);
+    color: var(--text-white);
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+}
+
+.text-gold {
+    color: var(--gold);
+}
+
+/* Header */
+.header {
+    background: linear-gradient(180deg, #05160c 0%, var(--bg-dark-green) 100%);
+    border-bottom: 2px solid var(--gold);
+    padding: 2.5rem 1rem;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+
+.site-title {
+    font-size: 2.5rem;
+    font-weight: 900;
+    margin: 0;
+    letter-spacing: 2px;
+    color: var(--gold);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+}
+
+.site-subtitle {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-white);
+    margin-top: 0.5rem;
+    letter-spacing: 2px;
+}
+
+/* Main Container */
+.main-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 3rem 1rem;
+}
+
+.section-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-white);
+    border-bottom: 2px solid var(--gold);
+    padding-bottom: 0.5rem;
+    margin-bottom: 2rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Dashboard Grid */
+.races-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+}
+
+/* Card Design */
+.race-card {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.race-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8), 0 0 15px rgba(212, 175, 55, 0.2);
+    border-color: var(--gold);
+}
+
+.race-header {
+    background: linear-gradient(90deg, rgba(212,175,55,0.1) 0%, transparent 100%);
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.race-name {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--gold-light);
+    letter-spacing: 1px;
+}
+
+.race-meta {
+    display: flex;
+    gap: 1.5rem;
+    font-size: 0.95rem;
+    color: var(--text-gray);
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.race-body {
+    padding: 0;
+}
+
+/* Table Design */
+.prediction-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.prediction-table th {
+    background-color: rgba(0, 0, 0, 0.2);
+    color: var(--gold);
+    font-weight: 700;
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.95rem;
+    letter-spacing: 1px;
+}
+
+.prediction-table td {
+    padding: 1.25rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    vertical-align: middle;
+}
+
+.prediction-table tr:last-child td {
+    border-bottom: none;
+}
+
+.prediction-table tr {
+    transition: background-color 0.2s;
+}
+
+.prediction-table tr:hover {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+.col-mark { width: 15%; text-align: center; }
+.col-name { width: 30%; font-weight: 900; font-size: 1.1rem; letter-spacing: 1px; color: var(--text-white); }
+.col-comment { width: 55%; color: var(--text-gray); line-height: 1.8; }
+
+.cell-mark { text-align: center; }
+
+/* Prediction Badges */
+.mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    font-weight: 900;
+    font-size: 1.5rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+
+.badge-double { 
+    background: linear-gradient(135deg, #ff5252, #c62828); 
+    color: white; 
+    border: 2px solid #ff8a80;
+    transform: scale(1.1); /* ◎を少し大きく強調 */
+}
+.badge-circle { 
+    background: linear-gradient(135deg, #ffb74d, #ef6c00); 
+    color: white; 
+    border: 2px solid #ffe0b2;
+}
+.badge-triangle { 
+    background: linear-gradient(135deg, #4caf50, #2e7d32); 
+    color: white; 
+    border: 2px solid #a5d6a7;
+}
+.badge-other { 
+    background: linear-gradient(135deg, #757575, #424242); 
+    color: #e0e0e0; 
+    border: 1px solid #9e9e9e;
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+}
+
+/* Footer */
+.footer {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-gray);
+    font-size: 0.9rem;
+    background-color: #05160c;
+    border-top: 1px solid var(--border-color);
+    margin-top: 4rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .race-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .prediction-table thead {
+        display: none;
+    }
+    .prediction-table, .prediction-table tbody, .prediction-table tr, .prediction-table td {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .prediction-table tr {
+        border-bottom: 1px solid var(--border-color);
+        padding: 1.5rem 1rem;
+    }
+    .prediction-table tr:last-child {
+        border-bottom: none;
+    }
+    .prediction-table td {
+        border-bottom: none;
+        padding: 0.5rem 0;
+        text-align: left;
+    }
+    
+    .cell-mark {
+        display: flex;
+        justify-content: flex-start;
+        margin-bottom: 0.5rem;
+    }
+    
+    .col-name { width: 100%; font-size: 1.2rem; }
+    .col-comment { width: 100%; margin-top: 0.5rem; font-size: 0.95rem; }
+    .col-chart { display: none; }
+    .cell-chart { width: 100%; margin-top: 1rem; border-top: 1px dashed var(--border-color); padding-top: 1rem; display: flex; justify-content: center;}
+}
+
+/* Header Login Button */
+.header-inner {
+    position: relative;
+}
+
+.login-btn {
+    position: absolute;
+    top: -10px;
+    right: 0;
+    background: transparent;
+    color: var(--gold);
+    border: 1px solid var(--gold);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.85rem;
+    transition: all 0.3s;
+}
+
+.login-btn:hover {
+    background: rgba(212, 175, 55, 0.2);
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
+}
+
+@media (max-width: 768px) {
+    .login-btn {
+        position: static;
+        margin-top: 1rem;
+    }
+}
+
+/* Chart Container */
+.col-chart { width: 25%; text-align: center; }
+.chart-container {
+    width: 130px;
+    height: 130px;
+    margin: 0 auto;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    background-color: var(--card-bg);
+    margin: 10% auto;
+    padding: 2.5rem;
+    border: 2px solid var(--gold);
+    width: 90%;
+    max-width: 400px;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.8), 0 0 20px rgba(212, 175, 55, 0.3);
+    position: relative;
+    animation: modalFadeIn 0.3s;
+}
+
+@keyframes modalFadeIn {
+    from { opacity: 0; transform: translateY(-30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.close-btn {
+    color: var(--text-gray);
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.close-btn:hover {
+    color: var(--gold);
+}
+
+.modal-title {
+    color: var(--gold);
+    text-align: center;
+    margin-top: 0;
+    font-size: 1.5rem;
+    letter-spacing: 2px;
+}
+
+.modal-desc {
+    text-align: center;
+    font-size: 0.9rem;
+    margin-bottom: 2rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--text-gray);
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.75rem;
+    box-sizing: border-box;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    color: white;
+    border-radius: 6px;
+    font-family: inherit;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--gold);
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.submit-btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--gold), #b8860b);
+    color: #111;
+    border: none;
+    padding: 1rem;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    margin-top: 1rem;
+}
+
+.submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4);
+}
+
+.register-link {
+    text-align: center;
+    margin-top: 1.5rem;
+    font-size: 0.85rem;
+}
+
+.register-link a {
+    color: var(--gold);
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.register-link a:hover {
+    text-decoration: underline;
+}
+
+/* Ad Space Styling */
+.ad-space-container {
+    width: 100%;
+    max-width: 1000px;
+    margin: 1.5rem auto;
+    padding: 0 1rem;
+    box-sizing: border-box;
+}
+
+.ad-space {
+    width: 100%;
+    min-height: 100px;
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px dashed rgba(212, 175, 55, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 8px;
+    position: relative;
+    transition: background-color 0.3s;
+}
+
+.ad-space:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.ad-label {
+    font-size: 0.75rem;
+    color: var(--text-gray);
+    position: absolute;
+    top: 5px;
+    left: 10px;
+    letter-spacing: 1px;
+}
