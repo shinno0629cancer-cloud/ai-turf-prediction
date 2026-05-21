@@ -186,8 +186,9 @@ async def startup_event():
 async def read_root(request: Request):
     try:
         return templates.TemplateResponse(
-            "index.html", 
-            {"request": request, "races": scraped_races_cache}
+            request=request,
+            name="index.html", 
+            context={"races": scraped_races_cache}
         )
     except Exception as e:
         import traceback
