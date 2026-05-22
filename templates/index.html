@@ -3,208 +3,173 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI競馬予想 - 本日の注目レース</title>
-    <link href="{{ url_for('static', path='/style.css') }}" rel="stylesheet">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
-    <!-- FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-<body>
-    <header class="header">
-        <div class="header-inner">
-            <h1 class="site-title"><i class="fa-solid fa-horse-head"></i> AI TURF PREDICTION</h1>
-            <p class="site-subtitle">次世代AIが導き出す、勝利への軌跡</p>
-            <button id="loginBtn" class="login-btn"><i class="fa-solid fa-user"></i> ログイン / 新規登録</button>
-        </div>
-    </header>
-
-    <!-- 広告エリア (ヘッダー直下) -->
-    <div class="ad-space-container">
-        <div class="ad-space">
-            <span class="ad-label">スポンサーリンク</span>
-            <!-- ここに将来的にGoogle AdSenseなどのJSコードを貼り付けます -->
-        </div>
-    </div>
-
-    <!-- Login Modal -->
-    <div id="loginModal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn" id="closeModal">&times;</span>
-            <h2 class="modal-title">PREMIUM MEMBER</h2>
-            <p class="modal-desc">有料会員限定の精緻なデータへアクセス</p>
-            <form class="login-form">
-                <div class="form-group">
-                    <label for="email">メールアドレス</label>
-                    <input type="email" id="email" placeholder="example@aiturf.com" required>
-                </div>
-                <div class="form-group">
-                    <label for="password">パスワード</label>
-                    <input type="password" id="password" placeholder="••••••••" required>
-                </div>
-                <button type="button" class="submit-btn">ログインして予想を見る</button>
-                <p class="register-link">アカウントをお持ちでない方は<a href="#">こちら</a></p>
-            </form>
-        </div>
-    </div>
-
-    <main class="main-container">
-        <section class="attention-section">
-            <h2 class="section-title">
-                <i class="fa-solid fa-fire text-gold"></i> AI予想ダッシュボード
-            </h2>
-            
-            {% if races|length == 0 %}
-            <div class="empty-state" style="text-align: center; padding: 4rem 2rem; background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px;">
-                <i class="fa-solid fa-calendar-xmark" style="font-size: 3rem; color: var(--gold); margin-bottom: 1rem;"></i>
-                <h3 style="margin-bottom: 0.5rem;">現在確定している中央競馬のレースはありません。</h3>
-                <p style="color: var(--text-muted); font-size: 0.9rem;">※週末（土日）の中央競馬レースの出走馬は、通常木曜日または金曜日に確定し、公開されます。</p>
-            </div>
-            {% else %}
-            <div class="races-grid">
-                {% for race in races %}
-                <div class="race-card">
-                    <div class="race-header">
-                        <h3 class="race-name">{{ race.race_name }}</h3>
-                        <div class="race-meta">
-                            <span class="meta-item"><i class="fa-solid fa-location-dot text-gold"></i> {{ race.location }}</span>
-                            <span class="meta-item"><i class="fa-solid fa-sun text-gold"></i> 晴</span>
-                            <span class="meta-item"><i class="fa-solid fa-leaf text-gold"></i> 良馬場</span>
-                        </div>
-                    </div>
-                    <div class="race-body">
-                        <table class="prediction-table">
-                            <thead>
-                                <tr>
-                                    <th class="col-mark">予想印</th>
-                                    <th class="col-name">馬名</th>
-                                    <th class="col-comment">AI解説コメント</th>
-                                    <th class="col-chart">能力チャート</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for horse in race.horses %}
-                                <tr>
-                                    <td class="cell-mark">
-                                        <span class="mark badge-{{ 'double' if horse.mark == '◎' else 'circle' if horse.mark == '〇' else 'triangle' if horse.mark == '▲' else 'other' }}">
-                                            {{ horse.mark }}
-                                        </span>
-                                    </td>
-                                    <td class="cell-name">{{ horse.name }}</td>
-                                    <td class="cell-comment">{{ horse.comment }}</td>
-                                    <td class="cell-chart">
-                                        <div class="chart-container">
-                                            <canvas class="radar-chart" 
-                                                data-speed="{{ horse.metrics.speed }}"
-                                                data-stamina="{{ horse.metrics.stamina }}"
-                                                data-pedigree="{{ horse.metrics.pedigree }}"
-                                                data-jockey="{{ horse.metrics.jockey }}"
-                                                data-past="{{ horse.metrics.past_record }}"
-                                            ></canvas>
-                                        </div>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                
-                <!-- 広告エリア (レースカードとレースカードの間) -->
-                {% if loop.index == 1 %}
-                <div class="ad-space-container">
-                    <div class="ad-space">
-                        <span class="ad-label">スポンサーリンク</span>
-                        <!-- ここに将来的にGoogle AdSenseなどのJSコードを貼り付けます -->
-                    </div>
-                </div>
-                {% endif %}
-                {% endfor %}
-            </div>
-            {% endif %}
-        </section>
-    </main>
-
-    <footer class="footer">
-        <p>&copy; 2026 AI Turf Prediction. All rights reserved.</p>
-    </footer>
-
-    <script>
-        // Modal Logic
-        const modal = document.getElementById("loginModal");
-        const btn = document.getElementById("loginBtn");
-        const span = document.getElementById("closeModal");
-
-        btn.onclick = function() { modal.style.display = "block"; }
-        span.onclick = function() { modal.style.display = "none"; }
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                modal.style.display = "none";
-            }
+    <title>AI競馬予想ダッシュボード</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #0f1115;
+            --card-bg: rgba(25, 28, 36, 0.7);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --gold: #fbbf24;
+            --gold-glow: rgba(251, 191, 36, 0.2);
+            --accent: #3b82f6;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+            background: var(--bg-main);
+            color: var(--text-main);
+            line-height: 1.6;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 85% 30%, rgba(251, 191, 36, 0.05) 0%, transparent 50%);
+        }
+        
+        header {
+            background: rgba(15, 17, 21, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #fff, var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        main {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
         }
 
-        // Chart.js Setup
-        document.addEventListener('DOMContentLoaded', function() {
-            Chart.defaults.color = '#b0c4b1';
-            Chart.defaults.font.family = "'Noto Sans JP', sans-serif";
+        .date-section {
+            margin-bottom: 3rem;
+        }
 
-            const canvases = document.querySelectorAll('.radar-chart');
-            canvases.forEach(canvas => {
-                const speed = canvas.dataset.speed;
-                const stamina = canvas.dataset.stamina;
-                const pedigree = canvas.dataset.pedigree;
-                const jockey = canvas.dataset.jockey;
-                const past = canvas.dataset.past;
+        .date-header {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--gold);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--gold-glow);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
 
-                new Chart(canvas, {
-                    type: 'radar',
-                    data: {
-                        labels: ['スピード', 'スタミナ', '血統', '騎手', '過去実績'],
-                        datasets: [{
-                            label: 'AI評価',
-                            data: [speed, stamina, pedigree, jockey, past],
-                            backgroundColor: 'rgba(212, 175, 55, 0.4)',
-                            borderColor: 'rgba(212, 175, 55, 1)',
-                            pointBackgroundColor: 'rgba(212, 175, 55, 1)',
-                            borderWidth: 2,
-                            pointRadius: 1
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        return context.raw + ' 点';
-                                    }
-                                }
-                            }
-                        },
-                        scales: {
-                            r: {
-                                angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
-                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
-                                pointLabels: {
-                                    color: '#b0c4b1',
-                                    font: { size: 9 }
-                                },
-                                ticks: {
-                                    display: false,
-                                    min: 0,
-                                    max: 100,
-                                    stepSize: 20
-                                }
-                            }
-                        }
-                    }
-                });
-            });
-        });
-    </script>
+        .venue-section {
+            margin-bottom: 2rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .venue-header {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .race-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .race-link-btn {
+            display: block;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: var(--text-main);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .race-link-btn:hover {
+            background: rgba(251, 191, 36, 0.1);
+            border-color: var(--gold);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+        }
+        
+        .empty-state h3 { margin-bottom: 0.5rem; }
+        .empty-state p { color: var(--text-muted); font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <i class="fa-solid fa-horse-head"></i> AI Turf Prediction
+        </div>
+    </header>
+    
+    <main>
+        {% if not has_races %}
+        <div class="empty-state">
+            <i class="fa-solid fa-calendar-xmark" style="font-size: 3rem; color: var(--gold); margin-bottom: 1rem;"></i>
+            <h3>現在確定している中央競馬のレースはありません。</h3>
+            <p>※週末（土日）の中央競馬レースの出走馬は、通常木曜日または金曜日に確定し、公開されます。</p>
+        </div>
+        {% else %}
+        
+        {% for date, venues in grouped_races.items() %}
+        <section class="date-section">
+            <h2 class="date-header">
+                <i class="fa-regular fa-calendar-days"></i> {{ date }}
+            </h2>
+            
+            {% for location, races in venues.items() %}
+            <div class="venue-section">
+                <h3 class="venue-header">
+                    <i class="fa-solid fa-map-location-dot"></i> {{ location }}
+                </h3>
+                
+                <div class="race-grid">
+                    {% for race in races %}
+                    <a href="/race/{{ race.race_id }}" class="race-link-btn">
+                        {{ race.race_name }}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </section>
+        {% endfor %}
+        
+        {% endif %}
+    </main>
 </body>
 </html>

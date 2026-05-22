@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI競馬予想 - 本日の注目レース</title>
+    <link href="http://127.0.0.1:8001/static/style.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="header-inner">
+            <h1 class="site-title"><i class="fa-solid fa-horse-head"></i> AI TURF PREDICTION</h1>
+            <p class="site-subtitle">次世代AIが導き出す、勝利への軌跡</p>
+            <button id="loginBtn" class="login-btn"><i class="fa-solid fa-user"></i> ログイン / 新規登録</button>
+        </div>
+    </header>
+
+    <!-- 広告エリア (ヘッダー直下) -->
+    <div class="ad-space-container">
+        <div class="ad-space">
+            <span class="ad-label">スポンサーリンク</span>
+            <!-- ここに将来的にGoogle AdSenseなどのJSコードを貼り付けます -->
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" id="closeModal">&times;</span>
+            <h2 class="modal-title">PREMIUM MEMBER</h2>
+            <p class="modal-desc">有料会員限定の精緻なデータへアクセス</p>
+            <form class="login-form">
+                <div class="form-group">
+                    <label for="email">メールアドレス</label>
+                    <input type="email" id="email" placeholder="example@aiturf.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">パスワード</label>
+                    <input type="password" id="password" placeholder="••••••••" required>
+                </div>
+                <button type="button" class="submit-btn">ログインして予想を見る</button>
+                <p class="register-link">アカウントをお持ちでない方は<a href="#">こちら</a></p>
+            </form>
+        </div>
+    </div>
+
+    <main class="main-container">
+        <section class="attention-section">
+            <h2 class="section-title">
+                <i class="fa-solid fa-fire text-gold"></i> AI予想ダッシュボード
+            </h2>
+            
+            <div class="races-grid">
+                
+                <div class="race-card">
+                    <div class="race-header">
+                        <h3 class="race-name">奈良県産はちみつ特別A2</h3>
+                        <div class="race-meta">
+                            <span class="meta-item"><i class="fa-solid fa-location-dot text-gold"></i> 本日の開催</span>
+                            <span class="meta-item"><i class="fa-solid fa-sun text-gold"></i> 晴</span>
+                            <span class="meta-item"><i class="fa-solid fa-leaf text-gold"></i> 良馬場</span>
+                        </div>
+                    </div>
+                    <div class="race-body">
+                        <table class="prediction-table">
+                            <thead>
+                                <tr>
+                                    <th class="col-mark">予想印</th>
+                                    <th class="col-name">馬名</th>
+                                    <th class="col-comment">AI解説コメント</th>
+                                    <th class="col-chart">能力チャート</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                
+                                <tr>
+                                    <td class="cell-mark">
+                                        <span class="mark badge-double">
+                                            ◎
+                                        </span>
+                                    </td>
+                                    <td class="cell-name">キングスピカ</td>
+                                    <td class="cell-comment">過去実績は十分。鞍上の勝率も高く好材料。順調に仕上がっている。（AIスコア: 76点）</td>
+                                    <td class="cell-chart">
+                                        <div class="chart-container">
+                                            <canvas class="radar-chart" 
+                                                data-speed="94"
+                                                data-stamina="70"
+                                                data-pedigree="92"
+                                                data-jockey="64"
+                                                data-past="64"
+                                            ></canvas>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <td class="cell-mark">
+                                        <span class="mark badge-circle">
+                                            〇
+                                        </span>
+                                    </td>
+                                    <td class="cell-name">オールパルフェ</td>
+                                    <td class="cell-comment">過去実績は十分。鞍上の勝率も高く好材料。状態面で少し不安が残るか。（AIスコア: 69点）</td>
+                                    <td class="cell-chart">
+                                        <div class="chart-container">
+                                            <canvas class="radar-chart" 
+                                                data-speed="65"
+                                                data-stamina="82"
+                                                data-pedigree="63"
+                                                data-jockey="67"
+                                                data-past="70"
+                                            ></canvas>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <td class="cell-mark">
+                                        <span class="mark badge-triangle">
+                                            ▲
+                                        </span>
+                                    </td>
+                                    <td class="cell-name">プリンセスカレン</td>
+                                    <td class="cell-comment">過去実績は十分。鞍上の勝率も高く好材料。調教の動きも絶好調で期待できる。（AIスコア: 68点）</td>
+                                    <td class="cell-chart">
+                                        <div class="chart-container">
+                                            <canvas class="radar-chart" 
+                                                data-speed="90"
+                                                data-stamina="81"
+                                                data-pedigree="68"
+                                                data-jockey="44"
+                                                data-past="58"
+                                            ></canvas>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <td class="cell-mark">
+                                        <span class="mark badge-other">
+                                            △
+                                        </span>
+                                    </td>
+                                    <td class="cell-name">フェアリーブルー</td>
+                                    <td class="cell-comment">近走は振るわないが展開待ち。鞍上の勝率も高く好材料。状態面で少し不安が残るか。（AIスコア: 67点）</td>
+                                    <td class="cell-chart">
+                                        <div class="chart-container">
+                                            <canvas class="radar-chart" 
+                                                data-speed="74"
+                                                data-stamina="83"
+                                                data-pedigree="53"
+                                                data-jockey="89"
+                                                data-past="40"
+                                            ></canvas>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <td class="cell-mark">
+                                        <span class="mark badge-other">
+                                            ☆
+                                        </span>
+                                    </td>
+                                    <td class="cell-name">レッドブロンクス</td>
+                                    <td class="cell-comment">近走は振るわないが展開待ち。鞍上の勝率も高く好材料。調教の動きも絶好調で期待できる。（AIスコア: 65点）</td>
+                                    <td class="cell-chart">
+                                        <div class="chart-container">
+                                            <canvas class="radar-chart" 
+                                                data-speed="76"
+                                                data-stamina="81"
+                                                data-pedigree="91"
+                                                data-jockey="41"
+                                                data-past="40"
+                                            ></canvas>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <td class="cell-mark">
+                                        <span class="mark badge-other">
+                                            ・
+                                        </span>
+                                    </td>
+                                    <td class="cell-name">キクノルメイユール</td>
+                                    <td class="cell-comment">近走は振るわないが展開待ち。鞍上の勝率も高く好材料。状態面で少し不安が残るか。（AIスコア: 65点）</td>
+                                    <td class="cell-chart">
+                                        <div class="chart-container">
+                                            <canvas class="radar-chart" 
+                                                data-speed="76"
+                                                data-stamina="71"
+                                                data-pedigree="79"
+                                                data-jockey="61"
+                                                data-past="40"
+                                            ></canvas>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <td class="cell-mark">
+                                        <span class="mark badge-other">
+                                            ・
+                                        </span>
+                                    </td>
+                                    <td class="cell-name">クリニエールグラス</td>
+                                    <td class="cell-comment">過去実績は十分。順調に仕上がっている。（AIスコア: 62点）</td>
+                                    <td class="cell-chart">
+                                        <div class="chart-container">
+                                            <canvas class="radar-chart" 
+                                                data-speed="92"
+                                                data-stamina="83"
+                                                data-pedigree="65"
+                                                data-jockey="21"
+                                                data-past="52"
+                                            ></canvas>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <td class="cell-mark">
+                                        <span class="mark badge-other">
+                                            ・
+                                        </span>
+                                    </td>
+                                    <td class="cell-name">ヴァトレニ</td>
+                                    <td class="cell-comment">過去実績は十分。状態面で少し不安が残るか。（AIスコア: 61点）</td>
+                                    <td class="cell-chart">
+                                        <div class="chart-container">
+                                            <canvas class="radar-chart" 
+                                                data-speed="69"
+                                                data-stamina="95"
+                                                data-pedigree="59"
+                                                data-jockey="37"
+                                                data-past="49"
+                                            ></canvas>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <td class="cell-mark">
+                                        <span class="mark badge-other">
+                                            ・
+                                        </span>
+                                    </td>
+                                    <td class="cell-name">ロッキーサンダー</td>
+                                    <td class="cell-comment">過去実績は十分。順調に仕上がっている。（AIスコア: 61点）</td>
+                                    <td class="cell-chart">
+                                        <div class="chart-container">
+                                            <canvas class="radar-chart" 
+                                                data-speed="88"
+                                                data-stamina="65"
+                                                data-pedigree="82"
+                                                data-jockey="10"
+                                                data-past="61"
+                                            ></canvas>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <td class="cell-mark">
+                                        <span class="mark badge-other">
+                                            ・
+                                        </span>
+                                    </td>
+                                    <td class="cell-name">グランドルチル</td>
+                                    <td class="cell-comment">近走は振るわないが展開待ち。鞍上の勝率も高く好材料。順調に仕上がっている。（AIスコア: 60点）</td>
+                                    <td class="cell-chart">
+                                        <div class="chart-container">
+                                            <canvas class="radar-chart" 
+                                                data-speed="59"
+                                                data-stamina="56"
+                                                data-pedigree="59"
+                                                data-jockey="90"
+                                                data-past="40"
+                                            ></canvas>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <td class="cell-mark">
+                                        <span class="mark badge-other">
+                                            ・
+                                        </span>
+                                    </td>
+                                    <td class="cell-name">イチネンエーグミ</td>
+                                    <td class="cell-comment">近走は振るわないが展開待ち。状態面で少し不安が残るか。（AIスコア: 60点）</td>
+                                    <td class="cell-chart">
+                                        <div class="chart-container">
+                                            <canvas class="radar-chart" 
+                                                data-speed="77"
+                                                data-stamina="76"
+                                                data-pedigree="95"
+                                                data-jockey="11"
+                                                data-past="43"
+                                            ></canvas>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <td class="cell-mark">
+                                        <span class="mark badge-other">
+                                            ・
+                                        </span>
+                                    </td>
+                                    <td class="cell-name">シリウス</td>
+                                    <td class="cell-comment">過去実績は十分。状態面で少し不安が残るか。（AIスコア: 56点）</td>
+                                    <td class="cell-chart">
+                                        <div class="chart-container">
+                                            <canvas class="radar-chart" 
+                                                data-speed="65"
+                                                data-stamina="60"
+                                                data-pedigree="85"
+                                                data-jockey="29"
+                                                data-past="43"
+                                            ></canvas>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- 広告エリア (レースカードとレースカードの間) -->
+                
+                <div class="ad-space-container">
+                    <div class="ad-space">
+                        <span class="ad-label">スポンサーリンク</span>
+                        <!-- ここに将来的にGoogle AdSenseなどのJSコードを貼り付けます -->
+                    </div>
+                </div>
+                
+                
+                <div class="race-card">
+                    <div class="race-header">
+                        <h3 class="race-name">コデマリ特別(A1)</h3>
+                        <div class="race-meta">
+                            <span class="meta-item"><i class="fa-solid fa-location-dot text-gold"></i> 本日の開催</span>
+                            <span class="meta-item"><i class="fa-solid fa-sun text-gold"></i> 晴</span>
+                            <span class="meta-item"><i class="fa-solid fa-leaf text-gold"></i> 良馬場</span>
+                        </div>
+                    </div>
+                    <div class="race-body">
+                        <table class="prediction-table">
+                            <thead>
+                                <tr>
+                                    <th class="col-mark">予想印</th>
+                                    <th class="col-name">馬名</th>
+                                    <th class="col-comment">AI解説コメント</th>
+                                    <th class="col-chart">能力チャート</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                
+                                <tr>
+                                    <td class="cell-mark">
+                                        <span class="mark badge-double">
+                                            ◎
+                                        </span>
+                                    </td>
+                                    <td class="cell-name">ドウドウキリシマ</td>
+                                    <td class="cell-comment">過去実績は十分。鞍上の勝率も高く好材料。順調に仕上がっている。（AIスコア: 75点）</td>
+                                    <td class="cell-chart">
+                                        <div class="chart-container">
+                                            <canvas class="radar-chart" 
+                                                data-speed="51"
+                                                data-stamina="76"
+                                                data-pedigree="86"
+                                                data-jockey="95"
+                                                data-past="70"
+                                            ></canvas>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <td class="cell-mark">
+                                        <span class="mark badge-circle">
+                                            〇
+                                        </span>
+                                    </td>
+                                    <td class="cell-name">ヒカリオーソ</td>
+                                    <td class="cell-comment">過去実績は十分。鞍上の勝率も高く好材料。順調に仕上がっている。（AIスコア: 74点）</td>
+                                    <td class="cell-chart">
+                                        <div class="chart-container">
+                                            <canvas class="radar-chart" 
+                                                data-speed="81"
+                                                data-stamina="62"
+                                                data-pedigree="94"
+                                                data-jockey="73"
+                                                data-past="64"
+                                            ></canvas>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <td class="cell-mark">
+                                        <span class="mark badge-triangle">
+                                            ▲
+                                        </span>
+                                    </td>
+                                    <td class="cell-name">キタノインディ</td>
+                                    <td class="cell-comment">過去実績は十分。順調に仕上がっている。（AIスコア: 71点）</td>
+                                    <td class="cell-chart">
+                                        <div class="chart-container">
+                                            <canvas class="radar-chart" 
+                                                data-speed="76"
+                                                data-stamina="88"
+                                                data-pedigree="92"
+                                                data-jockey="32"
+                                                data-past="67"
+                                            ></canvas>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <td class="cell-mark">
+                                        <span class="mark badge-other">
+                                            △
+                                        </span>
+                                    </td>
+                                    <td class="cell-name">ピンクヴェノム</td>
+                                    <td class="cell-comment">過去実績は十分。順調に仕上がっている。（AIスコア: 68点）</td>
+                                    <td class="cell-chart">
+                                        <div class="chart-container">
+                                            <canvas class="radar-chart" 
+                                                data-speed="80"
+                                                data-stamina="91"
+                                                data-pedigree="68"
+                                                data-jockey="37"
+                                                data-past="64"
+                                            ></canvas>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <td class="cell-mark">
+                                        <span class="mark badge-other">
+                                            ☆
+                                        </span>
+                                    </td>
+                                    <td class="cell-name">ジャスパーメジャー</td>
+                                    <td class="cell-comment">近走は振るわないが展開待ち。鞍上の勝率も高く好材料。調教の動きも絶好調で期待できる。（AIスコア: 64点）</td>
+                                    <td class="cell-chart">
+                                        <div class="chart-container">
+                                            <canvas class="radar-chart" 
+                                                data-speed="81"
+                                                data-stamina="60"
+                                                data-pedigree="63"
+                                                data-jockey="58"
+                                                data-past="58"
+                                            ></canvas>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <td class="cell-mark">
+                                        <span class="mark badge-other">
+                                            ・
+                                        </span>
+                                    </td>
+                                    <td class="cell-name">ベストグリーン</td>
+                                    <td class="cell-comment">過去実績は十分。鞍上の勝率も高く好材料。順調に仕上がっている。（AIスコア: 64点）</td>
+                                    <td class="cell-chart">
+                                        <div class="chart-container">
+                                            <canvas class="radar-chart" 
+                                                data-speed="55"
+                                                data-stamina="71"
+                                                data-pedigree="79"
+                                                data-jockey="67"
+                                                data-past="49"
+                                            ></canvas>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <td class="cell-mark">
+                                        <span class="mark badge-other">
+                                            ・
+                                        </span>
+                                    </td>
+                                    <td class="cell-name">リコーヴィクター</td>
+                                    <td class="cell-comment">近走は振るわないが展開待ち。順調に仕上がっている。（AIスコア: 57点）</td>
+                                    <td class="cell-chart">
+                                        <div class="chart-container">
+                                            <canvas class="radar-chart" 
+                                                data-speed="70"
+                                                data-stamina="66"
+                                                data-pedigree="94"
+                                                data-jockey="16"
+                                                data-past="40"
+                                            ></canvas>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <td class="cell-mark">
+                                        <span class="mark badge-other">
+                                            ・
+                                        </span>
+                                    </td>
+                                    <td class="cell-name">メイテソーロ</td>
+                                    <td class="cell-comment">近走は振るわないが展開待ち。状態面で少し不安が残るか。（AIスコア: 56点）</td>
+                                    <td class="cell-chart">
+                                        <div class="chart-container">
+                                            <canvas class="radar-chart" 
+                                                data-speed="80"
+                                                data-stamina="79"
+                                                data-pedigree="67"
+                                                data-jockey="6"
+                                                data-past="49"
+                                            ></canvas>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- 広告エリア (レースカードとレースカードの間) -->
+                
+                
+                <div class="race-card">
+                    <div class="race-header">
+                        <h3 class="race-name">’26メトロポリタンメイカップ競走(A2B1)</h3>
+                        <div class="race-meta">
+                            <span class="meta-item"><i class="fa-solid fa-location-dot text-gold"></i> 本日の開催</span>
+                            <span class="meta-item"><i class="fa-solid fa-sun text-gold"></i> 晴</span>
+                            <span class="meta-item"><i class="fa-solid fa-leaf text-gold"></i> 良馬場</span>
+                        </div>
+                    </div>
+                    <div class="race-body">
+                        <table class="prediction-table">
+                            <thead>
+                                <tr>
+                                    <th class="col-mark">予想印</th>
+                                    <th class="col-name">馬名</th>
+                                    <th class="col-comment">AI解説コメント</th>
+                                    <th class="col-chart">能力チャート</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                
+                                <tr>
+                                    <td class="cell-mark">
+                                        <span class="mark badge-double">
+                                            ◎
+                                        </span>
+                                    </td>
+                                    <td class="cell-name">ペレグリン</td>
+                                    <td class="cell-comment">近走は振るわないが展開待ち。鞍上の勝率も高く好材料。順調に仕上がっている。（AIスコア: 76点）</td>
+                                    <td class="cell-chart">
+                                        <div class="chart-container">
+                                            <canvas class="radar-chart" 
+                                                data-speed="84"
+                                                data-stamina="90"
+                                                data-pedigree="95"
+                                                data-jockey="71"
+                                                data-past="40"
+                                            ></canvas>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <td class="cell-mark">
+                                        <span class="mark badge-circle">
+                                            〇
+                                        </span>
+                                    </td>
+                                    <td class="cell-name">アイアンサイズ</td>
+                                    <td class="cell-comment">近走は振るわないが展開待ち。鞍上の勝率も高く好材料。順調に仕上がっている。（AIスコア: 70点）</td>
+                                    <td class="cell-chart">
+                                        <div class="chart-container">
+                                            <canvas class="radar-chart" 
+                                                data-speed="65"
+                                                data-stamina="89"
+                                                data-pedigree="72"
+                                                data-jockey="84"
+                                                data-past="43"
+                                            ></canvas>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <td class="cell-mark">
+                                        <span class="mark badge-triangle">
+                                            ▲
+                                        </span>
+                                    </td>
+                                    <td class="cell-name">ネオトキオ</td>
+                                    <td class="cell-comment">過去実績は十分。状態面で少し不安が残るか。（AIスコア: 69点）</td>
+                                    <td class="cell-chart">
+                                        <div class="chart-container">
+                                            <canvas class="radar-chart" 
+                                                data-speed="81"
+                                                data-stamina="93"
+                                                data-pedigree="93"
+                                                data-jockey="27"
+                                                data-past="52"
+                                            ></canvas>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <td class="cell-mark">
+                                        <span class="mark badge-other">
+                                            △
+                                        </span>
+                                    </td>
+                                    <td class="cell-name">ヴィクトリーロード</td>
+                                    <td class="cell-comment">過去実績は十分。順調に仕上がっている。（AIスコア: 67点）</td>
+                                    <td class="cell-chart">
+                                        <div class="chart-container">
+                                            <canvas class="radar-chart" 
+                                                data-speed="88"
+                                                data-stamina="94"
+                                                data-pedigree="66"
+                                                data-jockey="29"
+                                                data-past="58"
+                                            ></canvas>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <td class="cell-mark">
+                                        <span class="mark badge-other">
+                                            ☆
+                                        </span>
+                                    </td>
+                                    <td class="cell-name">ロアリングルックス</td>
+                                    <td class="cell-comment">過去実績は十分。順調に仕上がっている。（AIスコア: 65点）</td>
+                                    <td class="cell-chart">
+                                        <div class="chart-container">
+                                            <canvas class="radar-chart" 
+                                                data-speed="69"
+                                                data-stamina="82"
+                                                data-pedigree="80"
+                                                data-jockey="32"
+                                                data-past="64"
+                                            ></canvas>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <td class="cell-mark">
+                                        <span class="mark badge-other">
+                                            ・
+                                        </span>
+                                    </td>
+                                    <td class="cell-name">ゼルトザーム</td>
+                                    <td class="cell-comment">近走は振るわないが展開待ち。鞍上の勝率も高く好材料。順調に仕上がっている。（AIスコア: 65点）</td>
+                                    <td class="cell-chart">
+                                        <div class="chart-container">
+                                            <canvas class="radar-chart" 
+                                                data-speed="89"
+                                                data-stamina="54"
+                                                data-pedigree="52"
+                                                data-jockey="94"
+                                                data-past="40"
+                                            ></canvas>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <td class="cell-mark">
+                                        <span class="mark badge-other">
+                                            ・
+                                        </span>
+                                    </td>
+                                    <td class="cell-name">ムーム</td>
+                                    <td class="cell-comment">近走は振るわないが展開待ち。鞍上の勝率も高く好材料。調教の動きも絶好調で期待できる。（AIスコア: 60点）</td>
+                                    <td class="cell-chart">
+                                        <div class="chart-container">
+                                            <canvas class="radar-chart" 
+                                                data-speed="58"
+                                                data-stamina="70"
+                                                data-pedigree="59"
+                                                data-jockey="76"
+                                                data-past="40"
+                                            ></canvas>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <td class="cell-mark">
+                                        <span class="mark badge-other">
+                                            ・
+                                        </span>
+                                    </td>
+                                    <td class="cell-name">ゴールデンブザー</td>
+                                    <td class="cell-comment">近走は振るわないが展開待ち。鞍上の勝率も高く好材料。状態面で少し不安が残るか。（AIスコア: 59点）</td>
+                                    <td class="cell-chart">
+                                        <div class="chart-container">
+                                            <canvas class="radar-chart" 
+                                                data-speed="61"
+                                                data-stamina="88"
+                                                data-pedigree="54"
+                                                data-jockey="56"
+                                                data-past="40"
+                                            ></canvas>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <td class="cell-mark">
+                                        <span class="mark badge-other">
+                                            ・
+                                        </span>
+                                    </td>
+                                    <td class="cell-name">ベニシア</td>
+                                    <td class="cell-comment">過去実績は十分。調教の動きも絶好調で期待できる。（AIスコア: 57点）</td>
+                                    <td class="cell-chart">
+                                        <div class="chart-container">
+                                            <canvas class="radar-chart" 
+                                                data-speed="61"
+                                                data-stamina="69"
+                                                data-pedigree="84"
+                                                data-jockey="6"
+                                                data-past="67"
+                                            ></canvas>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <td class="cell-mark">
+                                        <span class="mark badge-other">
+                                            ・
+                                        </span>
+                                    </td>
+                                    <td class="cell-name">ラーナローザ</td>
+                                    <td class="cell-comment">近走は振るわないが展開待ち。状態面で少し不安が残るか。（AIスコア: 56点）</td>
+                                    <td class="cell-chart">
+                                        <div class="chart-container">
+                                            <canvas class="radar-chart" 
+                                                data-speed="54"
+                                                data-stamina="93"
+                                                data-pedigree="90"
+                                                data-jockey="6"
+                                                data-past="40"
+                                            ></canvas>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <td class="cell-mark">
+                                        <span class="mark badge-other">
+                                            ・
+                                        </span>
+                                    </td>
+                                    <td class="cell-name">ブルーノート</td>
+                                    <td class="cell-comment">過去実績は十分。順調に仕上がっている。（AIスコア: 53点）</td>
+                                    <td class="cell-chart">
+                                        <div class="chart-container">
+                                            <canvas class="radar-chart" 
+                                                data-speed="64"
+                                                data-stamina="57"
+                                                data-pedigree="54"
+                                                data-jockey="5"
+                                                data-past="88"
+                                            ></canvas>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <td class="cell-mark">
+                                        <span class="mark badge-other">
+                                            ・
+                                        </span>
+                                    </td>
+                                    <td class="cell-name">ヘルメース</td>
+                                    <td class="cell-comment">近走は振るわないが展開待ち。調教の動きも絶好調で期待できる。（AIスコア: 50点）</td>
+                                    <td class="cell-chart">
+                                        <div class="chart-container">
+                                            <canvas class="radar-chart" 
+                                                data-speed="50"
+                                                data-stamina="86"
+                                                data-pedigree="63"
+                                                data-jockey="13"
+                                                data-past="40"
+                                            ></canvas>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <td class="cell-mark">
+                                        <span class="mark badge-other">
+                                            ・
+                                        </span>
+                                    </td>
+                                    <td class="cell-name">オトメナシャチョウ</td>
+                                    <td class="cell-comment">近走は振るわないが展開待ち。順調に仕上がっている。（AIスコア: 47点）</td>
+                                    <td class="cell-chart">
+                                        <div class="chart-container">
+                                            <canvas class="radar-chart" 
+                                                data-speed="56"
+                                                data-stamina="55"
+                                                data-pedigree="69"
+                                                data-jockey="5"
+                                                data-past="52"
+                                            ></canvas>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- 広告エリア (レースカードとレースカードの間) -->
+                
+                
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 AI Turf Prediction. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Modal Logic
+        const modal = document.getElementById("loginModal");
+        const btn = document.getElementById("loginBtn");
+        const span = document.getElementById("closeModal");
+
+        btn.onclick = function() { modal.style.display = "block"; }
+        span.onclick = function() { modal.style.display = "none"; }
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        // Chart.js Setup
+        document.addEventListener('DOMContentLoaded', function() {
+            Chart.defaults.color = '#b0c4b1';
+            Chart.defaults.font.family = "'Noto Sans JP', sans-serif";
+
+            const canvases = document.querySelectorAll('.radar-chart');
+            canvases.forEach(canvas => {
+                const speed = canvas.dataset.speed;
+                const stamina = canvas.dataset.stamina;
+                const pedigree = canvas.dataset.pedigree;
+                const jockey = canvas.dataset.jockey;
+                const past = canvas.dataset.past;
+
+                new Chart(canvas, {
+                    type: 'radar',
+                    data: {
+                        labels: ['スピード', 'スタミナ', '血統', '騎手', '過去実績'],
+                        datasets: [{
+                            label: 'AI評価',
+                            data: [speed, stamina, pedigree, jockey, past],
+                            backgroundColor: 'rgba(212, 175, 55, 0.4)',
+                            borderColor: 'rgba(212, 175, 55, 1)',
+                            pointBackgroundColor: 'rgba(212, 175, 55, 1)',
+                            borderWidth: 2,
+                            pointRadius: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.raw + ' 点';
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            r: {
+                                angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                pointLabels: {
+                                    color: '#b0c4b1',
+                                    font: { size: 9 }
+                                },
+                                ticks: {
+                                    display: false,
+                                    min: 0,
+                                    max: 100,
+                                    stepSize: 20
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

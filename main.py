@@ -32,6 +32,8 @@ def scrape_today_races():
     try:
         import requests
         from bs4 import BeautifulSoup
+        import re
+        import uuid
         
         # 1. トップページから開催競馬場のリストURLを取得
         top_url = "https://sports.yahoo.co.jp/keiba/"
@@ -50,17 +52,27 @@ def scrape_today_races():
             try:
                 r_v = requests.get(v_link, headers=headers, timeout=5)
                 soup_v = BeautifulSoup(r_v.text, 'html.parser')
+                
+                venue_title = soup_v.title.string if soup_v.title else ""
+                match = re.search(r'競馬 - (.*?) (.*?) レース一覧', venue_title)
+                if match:
+                    race_date = match.group(1).strip()
+                    location = match.group(2).strip()
+                else:
+                    race_date = "近日開催"
+                    location = "競馬場"
+                    
                 for a in soup_v.select('a'):
                     href = a.get('href')
                     if href and '/race/index/' in href:
                         # /index/ を /denma/ に置換して出馬表ページのURLにする
                         denma_url = requests.compat.urljoin("https://sports.yahoo.co.jp", href.replace('/index/', '/denma/'))
-                        denma_links.add(denma_url)
+                        denma_links.add((denma_url, race_date, location))
             except Exception as e:
                 print(f"Error checking venue {v_link}: {e}")
                 
         # 3. 各出馬表ページからレース名と馬名を抽出
-        for link in list(denma_links):
+        for link, race_date, location in list(denma_links):
             try:
                 r = requests.get(link, headers=headers, timeout=5)
                 soup = BeautifulSoup(r.text, 'html.parser')
@@ -87,8 +99,10 @@ def scrape_today_races():
                             
                 if race_name and horses:
                     races_data.append({
+                        "race_id": str(uuid.uuid4())[:8],
+                        "date": race_date,
                         "race_name": race_name,
-                        "location": "本日の開催", # Yahooから取得も可能ですがUIの統一性を重視
+                        "location": location,
                         "horses": [{"name": h} for h in horses[:18]]
                     })
             except Exception as e:
@@ -190,12 +204,46 @@ async def startup_event():
 @app.get("/")
 async def read_root(request: Request):
     try:
+        grouped = {}
+        valid_races = 0
+        for r in scraped_races_cache:
+            if "error" in r: continue
+            valid_races += 1
+            d = r.get("date", "開催日不明")
+            l = r.get("location", "競馬場不明")
+            if d not in grouped: grouped[d] = {}
+            if l not in grouped[d]: grouped[d][l] = []
+            grouped[d][l].append(r)
+            
+        # レース名に含まれる数字(1Rなど)でソートする関数
+        import re
+        def get_race_num(name):
+            m = re.search(r'(\d+)R', name)
+            return int(m.group(1)) if m else 999
+            
+        for d in grouped:
+            for l in grouped[d]:
+                grouped[d][l].sort(key=lambda x: get_race_num(x['race_name']))
+                
         return templates.TemplateResponse(
             request=request,
             name="index.html", 
-            context={"races": scraped_races_cache}
+            context={"grouped_races": grouped, "has_races": valid_races > 0}
         )
     except Exception as e:
         import traceback
         error_msg = traceback.format_exc()
         return {"error": str(e), "traceback": error_msg}
+
+@app.get("/race/{race_id}")
+async def read_race(request: Request, race_id: str):
+    race_data = next((r for r in scraped_races_cache if r.get("race_id") == race_id), None)
+    if not race_data:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Race not found")
+        
+    return templates.TemplateResponse(
+        request=request,
+        name="race_detail.html",
+        context={"race": race_data}
+    )
