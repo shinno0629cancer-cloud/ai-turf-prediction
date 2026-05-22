@@ -19,67 +19,84 @@ templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 scraped_races_cache = []
 
 def scrape_today_races():
-    """ 起動時にNetkeibaから本日のレース情報をスクレイピングする """
+    """
+    Yahoo!競馬から本日のレース情報（レース名、出走馬名など）をスクレイピングする
+    """
     print("本日のレース情報を取得しています...")
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
     }
     
-    urls_to_check = [
-        "https://race.netkeiba.com/"
-    ]
-    
-    race_links = set()
-    for base_url in urls_to_check:
-        try:
-            r = requests.get(base_url, headers=headers, timeout=5)
-            r.encoding = 'euc-jp'
-            soup = BeautifulSoup(r.text, 'html.parser')
-            # ページ内の出馬表リンクを探す
-            for a in soup.select('a'):
-                href = a.get('href')
-                if href and 'shutuba.html' in href and 'race_id=' in href:
-                    if href.startswith('http'):
-                        race_links.add(href)
-                    elif href.startswith('/'):
-                        # スラッシュで始まる場合はドメインを付与
-                        domain = "https://race.netkeiba.com" if "race.netkeiba" in base_url else "https://nar.netkeiba.com"
-                        race_links.add(domain + href)
-                    elif href.startswith('../'):
-                        race_links.add(base_url.rstrip('/') + href[2:])
-        except Exception as e:
-            print(f"Error checking {base_url}: {e}")
-            
     races_data = []
-    # 取得できた全てのレースを処理する
-    for link in list(race_links):
-        try:
-            r = requests.get(link, headers=headers, timeout=5)
-            r.encoding = 'euc-jp'
-            soup = BeautifulSoup(r.text, 'html.parser')
-            
-            race_name_elem = soup.select_one('.RaceName')
-            if not race_name_elem:
-                continue
+    
+    try:
+        import requests
+        from bs4 import BeautifulSoup
+        
+        # 1. トップページから開催競馬場のリストURLを取得
+        top_url = "https://sports.yahoo.co.jp/keiba/"
+        r_top = requests.get(top_url, headers=headers, timeout=5)
+        soup_top = BeautifulSoup(r_top.text, 'html.parser')
+        
+        venue_links = set()
+        for a in soup_top.select('a'):
+            href = a.get('href')
+            if href and '/race/list/' in href:
+                venue_links.add(requests.compat.urljoin(top_url, href))
                 
-            # 不要な改行を削除してレース名を取得
-            race_name = race_name_elem.text.strip().replace('\n', ' ')
-            
-            horses = []
-            for a in soup.select('.HorseName a'):
-                horse_name = a.text.strip()
-                if horse_name and horse_name not in horses:
-                    horses.append(horse_name)
+        # 2. 各競馬場ページから全レースの出馬表URLを取得
+        denma_links = set()
+        for v_link in venue_links:
+            try:
+                r_v = requests.get(v_link, headers=headers, timeout=5)
+                soup_v = BeautifulSoup(r_v.text, 'html.parser')
+                for a in soup_v.select('a'):
+                    href = a.get('href')
+                    if href and '/race/index/' in href:
+                        # /index/ を /denma/ に置換して出馬表ページのURLにする
+                        denma_url = requests.compat.urljoin("https://sports.yahoo.co.jp", href.replace('/index/', '/denma/'))
+                        denma_links.add(denma_url)
+            except Exception as e:
+                print(f"Error checking venue {v_link}: {e}")
+                
+        # 3. 各出馬表ページからレース名と馬名を抽出
+        for link in list(denma_links):
+            try:
+                r = requests.get(link, headers=headers, timeout=5)
+                soup = BeautifulSoup(r.text, 'html.parser')
+                
+                # レース名をタイトルから取得
+                title_text = soup.title.string if soup.title else ""
+                if "出馬表" not in title_text:
+                    continue
                     
-            if race_name and horses:
-                races_data.append({
-                    "race_name": race_name,
-                    "location": "本日の開催", # 簡易化
-                    "horses": [{"name": h} for h in horses[:18]]
-                })
-        except Exception as e:
-            print(f"Error fetching race details: {e}")
-            
+                # 「競馬 - 2026年優駿牝馬 出馬表 - スポーツナビ」などのフォーマットから抽出
+                parts = title_text.split('-')
+                if len(parts) >= 2:
+                    race_name = parts[1].replace('出馬表', '').strip()
+                else:
+                    race_name = "不明なレース"
+                    
+                # 馬名を取得
+                horses = []
+                for a in soup.select('td.hr-table__data--name a'):
+                    if '/horse/' in a.get('href', ''):
+                        horse_name = a.text.strip()
+                        if horse_name and horse_name not in horses:
+                            horses.append(horse_name)
+                            
+                if race_name and horses:
+                    races_data.append({
+                        "race_name": race_name,
+                        "location": "本日の開催", # Yahooから取得も可能ですがUIの統一性を重視
+                        "horses": [{"name": h} for h in horses[:18]]
+                    })
+            except Exception as e:
+                print(f"Error scraping race {link}: {e}")
+                
+    except Exception as e:
+        print(f"Error checking top page: {e}")
+        
     return races_data
 
 def calculate_horse_score(horse_name):
