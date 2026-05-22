@@ -67,12 +67,15 @@ def scrape_today_races():
                     if href and '/race/index/' in href:
                         # /index/ を /denma/ に置換して出馬表ページのURLにする
                         denma_url = requests.compat.urljoin("https://sports.yahoo.co.jp", href.replace('/index/', '/denma/'))
-                        denma_links.add((denma_url, race_date, location))
+                        # URLの末尾2桁がレース番号
+                        m = re.search(r'(\d{2})/?$', href)
+                        race_num = int(m.group(1)) if m else 999
+                        denma_links.add((denma_url, race_date, location, race_num))
             except Exception as e:
                 print(f"Error checking venue {v_link}: {e}")
                 
         # 3. 各出馬表ページからレース名と馬名を抽出
-        for link, race_date, location in list(denma_links):
+        for link, race_date, location, race_num in list(denma_links):
             try:
                 r = requests.get(link, headers=headers, timeout=5)
                 soup = BeautifulSoup(r.text, 'html.parser')
@@ -98,10 +101,12 @@ def scrape_today_races():
                             horses.append(horse_name)
                             
                 if race_name and horses:
+                    display_name = f"{race_num}R {race_name}" if race_num != 999 else race_name
                     races_data.append({
                         "race_id": str(uuid.uuid4())[:8],
                         "date": race_date,
-                        "race_name": race_name,
+                        "race_num": race_num,
+                        "race_name": display_name,
                         "location": location,
                         "horses": [{"name": h} for h in horses[:18]]
                     })
@@ -204,31 +209,46 @@ async def startup_event():
 @app.get("/")
 async def read_root(request: Request):
     try:
+        from datetime import datetime
+        import re
+        
+        def parse_date(d_str):
+            m = re.search(r'(\d+)年(\d+)月(\d+)日', d_str)
+            if m:
+                return datetime(int(m.group(1)), int(m.group(2)), int(m.group(3)))
+            return datetime.now()
+            
         grouped = {}
         valid_races = 0
+        today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        
         for r in scraped_races_cache:
             if "error" in r: continue
-            valid_races += 1
-            d = r.get("date", "開催日不明")
+            
+            d_str = r.get("date", "開催日不明")
+            r_date = parse_date(d_str)
+            
+            # 過去のレースはスキップ
+            if r_date < today:
+                continue
+                
             l = r.get("location", "競馬場不明")
-            if d not in grouped: grouped[d] = {}
-            if l not in grouped[d]: grouped[d][l] = []
-            grouped[d][l].append(r)
+            if d_str not in grouped: grouped[d_str] = {}
+            if l not in grouped[d_str]: grouped[d_str][l] = []
+            grouped[d_str][l].append(r)
+            valid_races += 1
             
-        # レース名に含まれる数字(1Rなど)でソートする関数
-        import re
-        def get_race_num(name):
-            m = re.search(r'(\d+)R', name)
-            return int(m.group(1)) if m else 999
+        # 開催日の時系列順にソート
+        sorted_grouped = {k: grouped[k] for k in sorted(grouped.keys(), key=parse_date)}
             
-        for d in grouped:
-            for l in grouped[d]:
-                grouped[d][l].sort(key=lambda x: get_race_num(x['race_name']))
+        for d in sorted_grouped:
+            for l in sorted_grouped[d]:
+                sorted_grouped[d][l].sort(key=lambda x: x.get('race_num', 999))
                 
         return templates.TemplateResponse(
             request=request,
             name="index.html", 
-            context={"grouped_races": grouped, "has_races": valid_races > 0}
+            context={"grouped_races": sorted_grouped, "has_races": valid_races > 0}
         )
     except Exception as e:
         import traceback
