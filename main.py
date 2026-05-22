@@ -25,10 +25,8 @@ def scrape_today_races():
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
     }
     
-    # 中央(JRA)と地方(NAR)の両方をチェック
     urls_to_check = [
-        "https://race.netkeiba.com/",
-        "https://nar.netkeiba.com/"
+        "https://race.netkeiba.com/"
     ]
     
     race_links = set()
@@ -53,8 +51,8 @@ def scrape_today_races():
             print(f"Error checking {base_url}: {e}")
             
     races_data = []
-    # 取得速度を考慮し、最大3レースのみ処理
-    for link in list(race_links)[:3]:
+    # 取得できた全てのレースを処理する
+    for link in list(race_links):
         try:
             r = requests.get(link, headers=headers, timeout=5)
             r.encoding = 'euc-jp'
@@ -110,7 +108,11 @@ def calculate_horse_score(horse_name):
         "past_record": past_record
     }
     
-    score = int((speed + stamina + pedigree + metrics["jockey"] + past_record) / 5)
+    # 新ロジック: 勝率重視の重み付け (スピードと騎手を高く評価)
+    true_score = (metrics["speed"] * 2.0) + (metrics["jockey"] * 1.5) + (metrics["stamina"] * 1.0) + (metrics["past_record"] * 0.5) + (metrics["pedigree"] * 0.5)
+    
+    # 100点満点スケールにざっくり調整
+    score = int(true_score / 5.5)
     
     has_top_3 = any(p <= 3 for p in past_placements)
     condition_score = random.randint(-5, 15)
@@ -123,21 +125,7 @@ async def startup_event():
     try:
         races_data = scrape_today_races()
         
-        # もしレースが見つからなかった場合のフォールバック（開催日でない場合など）
-        if not races_data:
-            print("本日のレース情報が見つからなかったため、ダミーデータを使用します。")
-            races_data = [
-                {
-                    "race_name": "第91回 日本ダービー(G1)",
-                    "location": "東京",
-                    "horses": [{"name": "ジャスティンミラノ"}, {"name": "シンエンペラー"}, {"name": "アーバンシック"}]
-                },
-                {
-                    "race_name": "第65回 宝塚記念(G1)",
-                    "location": "京都",
-                    "horses": [{"name": "ドウデュース"}, {"name": "ジャスティンパレス"}, {"name": "ブローザホーン"}]
-                }
-            ]
+
             
         # 各馬のスコアと印、コメントを事前計算
         for race in races_data:

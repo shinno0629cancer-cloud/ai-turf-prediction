@@ -56,6 +56,13 @@
                 <i class="fa-solid fa-fire text-gold"></i> AI予想ダッシュボード
             </h2>
             
+            {% if races|length == 0 %}
+            <div class="empty-state" style="text-align: center; padding: 4rem 2rem; background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px;">
+                <i class="fa-solid fa-calendar-xmark" style="font-size: 3rem; color: var(--gold); margin-bottom: 1rem;"></i>
+                <h3 style="margin-bottom: 0.5rem;">現在確定している中央競馬のレースはありません。</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">※週末（土日）の中央競馬レースの出走馬は、通常木曜日または金曜日に確定し、公開されます。</p>
+            </div>
+            {% else %}
             <div class="races-grid">
                 {% for race in races %}
                 <div class="race-card">
@@ -116,6 +123,7 @@
                 {% endif %}
                 {% endfor %}
             </div>
+            {% endif %}
         </section>
     </main>
 
